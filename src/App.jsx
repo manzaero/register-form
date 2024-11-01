@@ -1,5 +1,6 @@
 import styles from './app.module.css';
 import { useState, useRef } from "react";
+import { useForm } from 'react-hook-form';
 
 const sendForm = (data) => {
     console.log(data);
