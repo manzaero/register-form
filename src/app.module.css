@@ -73,6 +73,10 @@
   transition: background-color 0.3s ease;
 }
 
+.errorStyle {
+  color: brown;
+}
+
 .signButton:hover {
   background-color: #008080;
 }
