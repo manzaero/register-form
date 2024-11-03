@@ -1,6 +1,5 @@
 import styles from './app.module.css';
-import { useState, useRef } from "react";
-import { useForm } from 'react-hook-form';
+import {useRef, useState} from "react";
 
 const sendForm = (data) => {
     console.log(data);
@@ -18,9 +17,7 @@ export const App = () => {
     const ruleEmail = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
     const rulePassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])([a-zA-Z0-9]{8,})$/;
 
-    const isFormValid = () =>
-        !Object.values(error).some(e => e !== '') &&
-        !Object.values(formData).some(f => f === '');
+    const isFormValid = () => !Object.values(error).some(e => e !== '') && !Object.values(formData).some(f => f === '');
 
     const focusSubmitButtonIfValid = () => {
         if (isFormValid()) {
@@ -31,53 +28,37 @@ export const App = () => {
     const onSubmit = (event) => {
         event.preventDefault();
         if (isFormValid()) {
-            sendForm({ formData });
+            sendForm({formData});
         }
     };
 
-    const onEmail = ({ target }) => {
-        const email = target.value;
-        setFormData({ ...formData, email });
-
-        const emailError = ruleEmail.test(email) ? '' : 'Неправильный формат электронной почты.';
-        setError({ ...error, emailError });
-
-        focusSubmitButtonIfValid();
-    };
-
-    const onPassword = ({ target }) => {
-        const password = target.value;
-        setFormData({ ...formData, password });
-
-        const passwordError = rulePassword.test(password) ? '' : 'Пароль должен содержать не менее 8 символов, число, строчную и заглавную буквы.';
-        setError({ ...error, passwordError });
+    const inputChange = (field, value, rule, errorMessage) => {
+        setFormData(data => ({...data, [field]: value}));
+        let fieldError = '';
+        if (value === '') {
+            fieldError = 'Поле не должно быть пустым';
+        } else if (rule && !rule.test(value)) {
+            fieldError = errorMessage;
+        } else if (field === 'passwordRepeat' && value !== formData.password) {
+            fieldError = 'Пароли не совпадают';
+        }
+        setError(error => ({...error, [`${field}Error`]: fieldError}));
 
         focusSubmitButtonIfValid();
     };
 
-    const onPasswordRepeat = ({ target }) => {
-        const passwordRepeat = target.value;
-        setFormData({ ...formData, passwordRepeat });
-
-        const passwordRepeatError = passwordRepeat === formData.password ? '' : 'Пароли не совпадают!';
-        setError({ ...error, passwordRepeatError });
-
-        focusSubmitButtonIfValid();
-    };
-
-    const onBlur = (field, message) => {
+    const onBlur = (field) => {
         if (!formData[field]) {
-            setError(prevError => ({ ...prevError, [`${field}Error`]: message }));
+            setError(error => ({...error, [`${field}Error`]: 'Поле не должно быть пустым'}));
         }
     };
 
-    return (
-        <form className={styles.formContainer} onSubmit={onSubmit}>
+    return (<form className={styles.formContainer} onSubmit={onSubmit}>
             <input
                 className={styles.inputStyle}
                 value={formData.email}
-                onChange={onEmail}
-                onBlur={() => onBlur('email', 'Поле не должно быть пустым')}
+                onChange={({target}) => inputChange('email', target.value, ruleEmail, 'Неправильный формат электронной почты')}
+                onBlur={() => onBlur('email')}
                 type="text"
                 name="email"
                 placeholder="Email"
@@ -87,8 +68,8 @@ export const App = () => {
             <input
                 className={styles.inputStyle}
                 value={formData.password}
-                onChange={onPassword}
-                onBlur={() => onBlur('password', 'Поле не должно быть пустым')}
+                onChange={({target}) => inputChange('password', target.value, rulePassword, 'Пароль должен содержать не менее 8 символов, число, строчную и заглавную буквы.')}
+                onBlur={() => onBlur('password')}
                 type="password"
                 name="password"
                 placeholder="Password"
@@ -98,8 +79,8 @@ export const App = () => {
             <input
                 className={styles.inputStyle}
                 value={formData.passwordRepeat}
-                onChange={onPasswordRepeat}
-                onBlur={() => onBlur('passwordRepeat', 'Поле не должно быть пустым')}
+                onChange={({target}) => inputChange('passwordRepeat', target.value, null, '')}
+                onBlur={() => onBlur('passwordRepeat')}
                 type="password"
                 name="passwordRepeat"
                 placeholder="Repeat Password"
@@ -114,6 +95,5 @@ export const App = () => {
             >
                 Sign-up
             </button>
-        </form>
-    );
+        </form>);
 };
